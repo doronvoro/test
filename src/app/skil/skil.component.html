@@ -1,0 +1,140 @@
+<div *ngIf="isLoadingData" style="text-align:center" id="spinner">
+  <img src="" />
+</div>
+
+<p-confirmDialog header="" icon="fa fa-question-circle" width="425"></p-confirmDialog>
+
+ 
+
+<p-growl  styleClass="msg" [(value)]="msgs"  life="30000" ></p-growl>
+<div>
+  <p-dataTable #dt [value]="skils" [responsive]="true" [(selection)]="selectedSkil" [editable]="true" (onEditComplete)="cellEdit($event.data)"
+    (onEdit)="cellDirty($event)" (onEditInit)="onEditInit($event)">
+    <p-header>
+    <div class="ui-dialog-buttonpane ui-helper-clearfix">
+        <button type="button" pButton icon="fa-check" style="float:right" (click)="saveAll()" label="שמור"></button>
+        <span>רשימת סקילים (סה"כ   {{skils?.length}}  רשומות) </span>
+      </div> 
+    </p-header>
+
+    <p-column field="Code" header="קוד" sortable="true" [filter]="true" filterPlaceholder="חפש" ></p-column>
+    <p-column field="Name" header="סקיל" [editable]="true" sortable="true" [filter]="true"  filterMatchMode="contains"  filterPlaceholder="חפש"></p-column>
+
+    
+    <p-column field="Status" header="סטטוס" [editable]="false" sortable="true" [filter]="true"   filterMatchMode="equals"  >
+        <ng-template pTemplate="filter" let-col>
+              <p-dropdown [options]="statuses" [style]="{'width':'100%'}" 
+              (onChange)="onStatusFilterChange($event.value,col.field,dt)"
+              styleClass="ui-column-filter"></p-dropdown>
+        </ng-template>
+      <ng-template let-col let-skil="rowData" pTemplate="body">
+        
+          <p-checkbox [(ngModel)]="skil[col.field]"   binary="false" (onChange)="statusChange($event, skil)" ></p-checkbox>
+          <!-- <p-checkbox [(ngModel)]="skil[col.field]"  (onChange)="statusChange($event, skil)" ></p-checkbox> -->
+      </ng-template>
+      <!-- <ng-template let-col let-skil="rowData" pTemplate="editor">
+        <p-checkbox [(ngModel)]="skil[col.field]" ></p-checkbox>
+      </ng-template> -->
+    </p-column>
+    <p-column field="StartAt" header="ת.התחלה" [editable]="true" sortable="true" [filter]="false" filterPlaceholder="חפש" [style]=" {'overflow':'visible' }">
+     
+
+      <ng-template let-col let-skil="rowData" pTemplate="body">
+        {{skil[col.field]|date:'dd/MM/yyyy' }}
+      </ng-template>
+      <ng-template let-col let-skil="rowData" pTemplate="editor">
+        <p-calendar [(ngModel)]="skil[col.field]" appendTo="body" showIcon="true" [locale]="en"></p-calendar>
+      </ng-template>
+    </p-column>
+    <p-column field="EndAt" header="ת.סיום" [editable]="true" sortable="true" [filter]="false" filterPlaceholder="חפש" [style]=" {'overflow':'visible' }">
+      <ng-template let-col let-skil="rowData" pTemplate="body">
+        {{skil[col.field]|date:'dd/MM/yyyy' }}
+      </ng-template>
+      <ng-template let-col let-skil="rowData" pTemplate="editor">
+        <p-calendar [(ngModel)]="skil[col.field]" appendTo="body"></p-calendar>
+      </ng-template>
+    </p-column>
+
+
+
+
+    <!-- 
+ <p-column field="Status" header="Status1" [filter]="true" >
+        <ng-template pTemplate="filter" let-col>
+            <p-dropdown [options]="statuses" styleClass="ui-column-filter">
+              </p-dropdown>
+        </ng-template>
+    </p-column>   -->
+
+  
+    <p-column>
+      <ng-template let-col let-skil="rowData" pTemplate="body">
+        <button type="button" pButton icon="fa-close" (click)="delete(skil)"></button>
+      </ng-template>
+
+    </p-column>
+
+
+
+
+
+    <p-footer>
+      <div class="ui-helper-clearfix" style="width:100%;">
+        <button type="button" pButton icon="fa-plus" style="float:right" (click)="showDialogToAdd()" label="הוסף"></button>
+      </div>
+    </p-footer>
+  </p-dataTable>
+
+  <p-dialog header="הוסף סקיל חדש" [(visible)]="displayDialog" [responsive]="true" showEffect="fade" [modal]="true">
+    <div class="form-group ui-grid ui-grid-responsive ui-fluid" *ngIf="skil">  
+      <!-- <div class="ui-grid-row">
+        <div class="ui-grid-col-4">
+          <label for="Code">קוד</label>
+        </div>
+        <div class="ui-grid-col-8">
+          <input pInputText id="Code" [(ngModel)]="skil.Code" />
+        </div>
+      </div> -->
+      <div class="ui-grid-row">
+        <div class="ui-grid-col-4">
+          <label for="Name">סקיל</label>
+        </div>
+        <div class="ui-grid-col-8">
+          <input pInputText id="Name" [(ngModel)]="skil.Name" />
+        </div>
+      </div>
+      <div class="ui-grid-row">
+        <div class="ui-grid-col-4">
+          <label for="Status">סטטוס</label>
+        </div>
+        <div class="ui-grid-col-8">
+          <p-checkbox id="Status" [(ngModel)]="skil.Status"></p-checkbox>
+        </div>
+      </div>
+      <div class="ui-grid-row">
+        <div class="ui-grid-col-4">
+          <label for="StartAt"> ת.התחלה </label>
+        </div>
+        <div class="ui-grid-col-8">
+          <p-calendar showIcon="true" [(ngModel)]="skil.StartAt"></p-calendar>
+        </div>
+      </div>
+      <div class="ui-grid-row">
+        <div class="ui-grid-col-4">
+          <label for="EndAt"> ת.סיום </label>
+        </div>
+        <div class="ui-grid-col-8">
+          <p-calendar showIcon="true" [(ngModel)]="skil.EndAt"></p-calendar>
+        </div>
+      </div>
+    </div>
+    <p-footer>
+      <div class="ui-dialog-buttonpane ui-helper-clearfix">
+        <!-- <button type="button" pButton icon="fa-close" (click)="delete()" label="Delete"></button> -->
+        <button type="button" pButton icon="fa-check" (click)="save()" label="Save"></button>
+      </div>
+    </p-footer>
+  </p-dialog>
+
+
+</div>

@@ -1,0 +1,30 @@
+<p>
+   
+</p>
+
+
+<p-treeTable [value]="yaadim" dir="rtl" 
+
+ 
+>
+ 
+  <p-column  *ngFor="let col1 of cols" >
+      <ng-template let-col let-node="rowData" pTemplate="header">
+        {{col1.header}}
+       <br/>
+          Y|W
+      </ng-template>
+      <ng-template let-col let-node="rowData" pTemplate="body">
+          <input [(ngModel)]="node.data[col1.field]" pInputText (ngModelChange)="valuechange(node.data,col1 )"    type="text" style="width:45%">
+          <input [(ngModel)]="node.data[col1.field]" pInputText  (ngModelChange)="valuechange(node.data,col1)"  type="text" style="width:45%">
+      </ng-template>
+  </p-column>
+
+
+</p-treeTable>
+ 
+ 
+
+ 
+  
+
