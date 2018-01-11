@@ -1,0 +1,25 @@
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+
+.yaadMishkalHeader
+{
+    /* color: red; */
+    font-size:12px !important;
+    /* display: block !important; */
+    /* border-top-width: 1px;
+    border-top-color: black;
+    border-top-style: solid; */
+    
+}
+ 
+
+.fa-caret-right:before {
+    content: "\F0D9";
+}

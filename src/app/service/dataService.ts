@@ -9,88 +9,86 @@ import { Skil } from '../model/Skil';
 @Injectable()
 export class InventoryService {
 
-       baseUrl:string;
+    baseUrl: string;
 
-      constructor(private http: Http) {
-            this.baseUrl = "http://localhost:61665/api/" ;
-      }
-
-
-      public getAllSkils() {
-         return this.http.get( this.baseUrl +'skils').map((res: Response) => <Skil[]>res.json());
-       // return this.http.get( this.baseUrl +'skils').map((res: Response) => res.json()).map(({code,name,satus ,startAt,endAt}) => new Skil(code,name,satus ,new Date(startAt),new Date(endAt)));
-     
+    constructor(private http: Http) {
+        this.baseUrl = "http://localhost:61665/api/";
     }
 
-    public getAllProducts() {
-        return this.http.get( this.baseUrl +'Product/GetProducts').map((res: Response) => <Product[]>res.json());
-
-        //return this.http.get( this.baseUrl +'Product/GetProducts').map((res: Response) => res.json()).map(({}) => new );
-        
+    public getAllSkils() {
+        return this.http.get(this.baseUrl + 'skils').map((res: Response) => <Skil[]>res.json());
+        // return this.http.get( this.baseUrl +'skils').map((res: Response) => res.json()).map(({code,name,satus ,startAt,endAt}) => new Skil(code,name,satus ,new Date(startAt),new Date(endAt)));
     }
 
+    public getAllYaadim(date: Date) {
+        // let params = new URLSearchParams();
+        // params.set('date', 'aaaa');
+        // let headers = new Headers({  'Content-Type': 'application/x-www-form-urlencoded' });
+        // let options = new RequestOptions({ headers: headers, params: params });
+        // console.log(options);
 
-    saveAllSkils(skils :Skil[] , deleteIds : number[]) {
-var obj =  
+        let url = this.baseUrl + 'Yaadim?date=' + date.toISOString();
 
+        return this.http.get(url).map((res: Response) => res.json());
+    }
 
-{
-    "Skils": skils,
-    "deleteIds" : deleteIds
+    public  saveAllYaadim(yaadim: any[]) {
+       
 
-};
+        let headers = new Headers({ 'Content-Type': 'application/json' });
+        let options = new RequestOptions({ headers: headers });
+        let body = JSON.stringify(yaadim);
+
+        const req = this.http.post(this.baseUrl + 'Yaadim/SaveAll', body, options
+        )
+            .subscribe(
+            res => {
+                console.log(res);
+            },
+            err => {
+                console.log("Error occured");
+            }
+            );
+    }
+
+    saveAllSkils(skils: Skil[], deleteIds: number[]) {
+        var obj =
+            {
+                "Skils": skils,
+                "deleteIds": deleteIds
+            };
 
         let headers = new Headers({ 'Content-Type': 'application/json' });
         let options = new RequestOptions({ headers: headers });
         let body = JSON.stringify(obj);
 
-
-
-        const req = this.http.post(this.baseUrl +'skils/SaveAll', body, options
-          )
+        const req = this.http.post(this.baseUrl + 'skils/SaveAll', body, options
+        )
             .subscribe(
-              res => {
+            res => {
                 console.log(res);
-              },
-              err => {
+            },
+            err => {
                 console.log("Error occured");
-              }
+            }
             );
-
-
-        try
-        {
-            //return this.http.post(this.baseUrl +'skils/SaveAll', body, options).map((res: Response) => res.json());
-            
-        }
-        catch (e)
-        {
-            
-        } 
-
-        
-     
-
-      
     }
 
+    // addProduct(product) {
+    //     let headers = new Headers({ 'Content-Type': 'application/json' });
+    //     let options = new RequestOptions({ headers: headers });
+    //     let body = JSON.stringify(product);
+    //     return this.http.post(this.baseUrl + 'Product/', body, options).map((res: Response) => res.json());
+    // }
 
+    // updateProduct(product) {
+    //     let headers = new Headers({ 'Content-Type': 'application/json' });
+    //     let options = new RequestOptions({ headers: headers });
+    //     let body = JSON.stringify(product);
+    //     return this.http.put('/api/Product/' + product.Id, body, options).map((res: Response) => res.json());
+    // }
 
-    addProduct(product) {
-        let headers = new Headers({ 'Content-Type': 'application/json' });
-        let options = new RequestOptions({ headers: headers });
-        let body = JSON.stringify(product);
-        return this.http.post(this.baseUrl +'Product/', body, options).map((res: Response) => res.json());
-    }
-
-    updateProduct(product) {
-        let headers = new Headers({ 'Content-Type': 'application/json' });
-        let options = new RequestOptions({ headers: headers });
-        let body = JSON.stringify(product);
-        return this.http.put('/api/Product/' + product.Id, body, options).map((res: Response) => res.json());
-    }
-
-    deleteProduct(product) {
-        return this.http.delete(this.baseUrl +'/Product/' + product.Id);
-    }
-  }
+    // deleteProduct(product) {
+    //     return this.http.delete(this.baseUrl + '/Product/' + product.Id);
+    // }
+}

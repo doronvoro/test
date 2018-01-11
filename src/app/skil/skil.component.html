@@ -1,44 +1,54 @@
-<div *ngIf="isLoadingData" style="text-align:center" id="spinner">
-  <img src="" />
+<p-tree [value]="filesTree2"  ></p-tree>
+
+<div *ngIf="isLoadingData" style="text-align:center" id="spinner" >
+  <i class="fa fa-refresh fa-spin fa-3x fa-fw"></i>
 </div>
 
-<p-confirmDialog header="" icon="fa fa-question-circle" width="425"></p-confirmDialog>
+<p-confirmDialog header="" icon="fa fa-question-circle" width="425" #cd>
+  <p-footer>
+    <button type="button" pButton icon="fa-close" label="לא" (click)="cd.reject()"></button>
+    <button type="button" pButton icon="fa-check" label="כן" (click)="cd.accept()"></button>
+  </p-footer>
+</p-confirmDialog>
+
+<p-growl   [(value)]="msgs" life="250000"></p-growl>
+<div *ngIf="!isLoadingData">
 
  
 
-<p-growl  styleClass="msg" [(value)]="msgs"  life="30000" ></p-growl>
-<div>
-  <p-dataTable #dt [value]="skils" [responsive]="true" [(selection)]="selectedSkil" [editable]="true" (onEditComplete)="cellEdit($event.data)"
-    (onEdit)="cellDirty($event)" (onEditInit)="onEditInit($event)">
+
+  <p-dataTable #dt [value]="skils" [responsive]="true" [editable]="true" [rows]="10" [paginator]="true" [pageLinks]="3" [rowsPerPageOptions]="[5,10,20]"
+    emptyMessage="לא נמצאו רשומות" [(selection)]="selectedSkil" (onEditComplete)="cellEdit($event.data)" (onEdit)="cellDirty($event)"
+    (onEditInit)="onEditInit($event)" (change)="tableChange()">
+
     <p-header>
-    <div class="ui-dialog-buttonpane ui-helper-clearfix">
-        <button type="button" pButton icon="fa-check" style="float:right" (click)="saveAll()" label="שמור"></button>
-        <span>רשימת סקילים (סה"כ   {{skils?.length}}  רשומות) </span>
-      </div> 
+      <div class="ui-dialog-buttonpane ui-helper-clearfix">
+        <button type="button" pButton icon="fa-check" style="float:left" (click)="saveAll()" label="שמור" [disabled]="!(skilsToSave?.length  > 0 ||  skilsToDlete?.length  > 0)"></button>
+        <button type="button" pButton icon="fa-file-o" style="float:left" iconPos="left" label="אקסל" (click)="dt.exportCSV()"></button>
+        <span style="float:right">רשימת סקילים (סה"כ {{skils?.length}} רשומות) </span>
+      </div>
     </p-header>
-
-    <p-column field="Code" header="קוד" sortable="true" [filter]="true" filterPlaceholder="חפש" ></p-column>
-    <p-column field="Name" header="סקיל" [editable]="true" sortable="true" [filter]="true"  filterMatchMode="contains"  filterPlaceholder="חפש"></p-column>
-
-    
-    <p-column field="Status" header="סטטוס" [editable]="false" sortable="true" [filter]="true"   filterMatchMode="equals"  >
-        <ng-template pTemplate="filter" let-col>
-              <p-dropdown [options]="statuses" [style]="{'width':'100%'}" 
-              (onChange)="onStatusFilterChange($event.value,col.field,dt)"
-              styleClass="ui-column-filter"></p-dropdown>
-        </ng-template>
+    <p-column field="Code" header="קוד" sortable="true" [filter]="true" filterPlaceholder="חפש">
       <ng-template let-col let-skil="rowData" pTemplate="body">
-        
-          <p-checkbox [(ngModel)]="skil[col.field]"   binary="false" (onChange)="statusChange($event, skil)" ></p-checkbox>
-          <!-- <p-checkbox [(ngModel)]="skil[col.field]"  (onChange)="statusChange($event, skil)" ></p-checkbox> -->
+        {{skil[col.field]
+        < 0 ? "" : skil[col.field]}} </ng-template>
+
+    </p-column>
+    <p-column field="Name" header="סקיל" [editable]="true" sortable="true" [filter]="true" filterMatchMode="contains" filterPlaceholder="חפש"></p-column>
+    <p-column field="Status" header="סטטוס" [editable]="false" sortable="true" [filter]="true" filterMatchMode="equals">
+      <ng-template pTemplate="filter" let-col>
+        <p-dropdown [options]="statuses" [style]="{'width':'100%'}" (onChange)="onStatusFilterChange($event.value,col.field,dt)"
+          styleClass="ui-column-filter"></p-dropdown>
+      </ng-template>
+      <ng-template let-col let-skil="rowData" pTemplate="body">
+        <p-checkbox [(ngModel)]="skil[col.field]" binary="false" (onChange)="statusChange($event, skil)"></p-checkbox>
+        <!-- <p-checkbox [(ngModel)]="skil[col.field]"  (onChange)="statusChange($event, skil)" ></p-checkbox> -->
       </ng-template>
       <!-- <ng-template let-col let-skil="rowData" pTemplate="editor">
         <p-checkbox [(ngModel)]="skil[col.field]" ></p-checkbox>
       </ng-template> -->
     </p-column>
     <p-column field="StartAt" header="ת.התחלה" [editable]="true" sortable="true" [filter]="false" filterPlaceholder="חפש" [style]=" {'overflow':'visible' }">
-     
-
       <ng-template let-col let-skil="rowData" pTemplate="body">
         {{skil[col.field]|date:'dd/MM/yyyy' }}
       </ng-template>
@@ -54,10 +64,6 @@
         <p-calendar [(ngModel)]="skil[col.field]" appendTo="body"></p-calendar>
       </ng-template>
     </p-column>
-
-
-
-
     <!-- 
  <p-column field="Status" header="Status1" [filter]="true" >
         <ng-template pTemplate="filter" let-col>
@@ -65,36 +71,48 @@
               </p-dropdown>
         </ng-template>
     </p-column>   -->
-
-  
     <p-column>
       <ng-template let-col let-skil="rowData" pTemplate="body">
-        <button type="button" pButton icon="fa-close" (click)="delete(skil)"></button>
+        <button type="button" pButton icon="fa fa-trash" (click)="delete(skil)"></button>
       </ng-template>
-
     </p-column>
-
-
-
-
-
-    <p-footer>
+    <!-- <p-footer>
       <div class="ui-helper-clearfix" style="width:100%;">
-        <button type="button" pButton icon="fa-plus" style="float:right" (click)="showDialogToAdd()" label="הוסף"></button>
+        <button type="button" pButton icon="fa-plus" style="float:left" (click)="showDialogToAdd()" label="הוסף"></button>
       </div>
-    </p-footer>
+    </p-footer> -->
   </p-dataTable>
 
-  <p-dialog header="הוסף סקיל חדש" [(visible)]="displayDialog" [responsive]="true" showEffect="fade" [modal]="true">
-    <div class="form-group ui-grid ui-grid-responsive ui-fluid" *ngIf="skil">  
-      <!-- <div class="ui-grid-row">
-        <div class="ui-grid-col-4">
-          <label for="Code">קוד</label>
-        </div>
-        <div class="ui-grid-col-8">
-          <input pInputText id="Code" [(ngModel)]="skil.Code" />
-        </div>
-      </div> -->
+  <div class="ui-widget-header" style="padding:4px 10px;border-bottom: 0 none">
+
+    <div class="ui-g">
+      <div class="ui-g-2"> </div>
+      <div class="ui-g-2">
+        <input type="text" pInputText placeholder="סקיל" [(ngModel)]="skil.Name"> </div>
+      <div class="ui-g-2">
+        <p-checkbox id="newSkilStatus" binary="true" [(ngModel)]="newSkilStatus" (onChange)="newSkilstatusChange($event,skil)"></p-checkbox>
+        <!-- (onChange)="newSkilstatusChange(skil)" -->
+      </div>
+      <div class="ui-g-2">
+        <p-calendar placeholder="ת.התחלה" [locale]="en" [(ngModel)]="skil.StartAt"></p-calendar>
+      </div>
+      <div class="ui-g-2">
+        <p-calendar placeholder="ת.סיום" [locale]="en" [(ngModel)]="skil.EndAt"></p-calendar>
+      </div>
+      <div class="ui-g-2">
+        <button type="button" pButton icon="fa-plus" (click)="save(dt)" [disabled]="!skil.Name" label="הוסף"></button>
+      </div>
+    </div>
+
+  </div>
+
+
+
+
+
+  <p-dialog width="425" height="500" header="הוסף סקיל חדש" [(visible)]="displayDialog" [responsive]="true" showEffect="fade"
+    [modal]="true">
+    <div class="form-group ui-grid ui-grid-responsive ui-fluid" *ngIf="skil">
       <div class="ui-grid-row">
         <div class="ui-grid-col-4">
           <label for="Name">סקיל</label>

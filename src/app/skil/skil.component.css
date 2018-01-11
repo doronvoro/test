@@ -2,5 +2,24 @@
 {
     /* left: 20 !important; */
     right:800 !important;
-
 }
+.fa-step-backward:before {
+    content: "\F051";
+}
+.fa-step-forward:before {
+    content: "\F048";
+}
+.fa-backward:before {
+    content: "\F04E";
+}
+.fa-forward:before {
+    content: "\F04A";
+}
+
+/* .ui-growl
+{
+    right:1px;
+    left: 20px ;  
+} */
+
+

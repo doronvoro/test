@@ -1,30 +1,62 @@
 <p>
-   
-</p>
-
-
-<p-treeTable [value]="yaadim" dir="rtl" 
-
  
->
- 
-  <p-column  *ngFor="let col1 of cols" >
-      <ng-template let-col let-node="rowData" pTemplate="header">
-        {{col1.header}}
-       <br/>
-          Y|W
-      </ng-template>
-      <ng-template let-col let-node="rowData" pTemplate="body">
-          <input [(ngModel)]="node.data[col1.field]" pInputText (ngModelChange)="valuechange(node.data,col1 )"    type="text" style="width:45%">
-          <input [(ngModel)]="node.data[col1.field]" pInputText  (ngModelChange)="valuechange(node.data,col1)"  type="text" style="width:45%">
-      </ng-template>
-  </p-column>
-
-
-</p-treeTable>
- 
+</p>  
  
 
- 
-  
+<div *ngIf="isLoadingData" style="text-align:center" id="spinner">
+    <i class="fa fa-refresh fa-spin fa-3x fa-fw"></i>
+</div>
+<div *ngIf="!isLoadingData">
+    <p-treeTable #dt [value]="yaadim" dir="rtl" selectionMode="single" [(selection)]="selectedNode" [contextMenu]="cm">
 
+        <p-header>
+            <div class="ui-dialog-buttonpane ui-helper-clearfix">
+                <div style="float:right">
+                 <p-dropdown [options]="years" [(ngModel)]="selectedYear"></p-dropdown>
+                 <p-dropdown [options]="months" [(ngModel)]="selectedMonth"></p-dropdown>
+
+                 <button pButton type="button" (click)="search()" label="חפש"></button>
+                </div>
+                <button type="button" pButton icon="fa-check" style="float:left" (click)="saveAll()" label="שמור"></button>
+                <button type="button" pButton icon="fa-file-o" style="float:left" iconPos="left" label="אקסל"  ></button>
+            </div>
+        </p-header>
+
+        <p-column *ngFor="let col1 of cols; let i = index" [attr.data-index]="i">
+            <ng-template let-col let-node="rowData" pTemplate="header">
+                {{col1.header}}
+                <br/>
+                <div *ngIf="i >0"   class="yaadMishkalHeader">
+                    יעד | משקל
+                </div>
+            </ng-template>
+            <input type="text" style="width:45%">
+
+              <ng-template  class="fa fa-lock fa-5x" #tYaad *ngIf="i >0" let-col let-node="rowData" pTemplate="body">
+                        <input 
+                        *ngIf="node.data[col1.field].allowEdit"
+                        [(ngModel)]="node.data[col1.field].yaad" 
+                        pInputText 
+                        (ngModelChange)="valuechange(node.data[col1.field])"
+                        type="number" 
+                        min="1" 
+                        style="width:45%">
+                <input 
+                
+                [(ngModel)]="node.data[col1.field].mishkal" 
+                        pInputText 
+                        (ngModelChange)="valuechange(node.data[col1.field])"
+                        type="number" 
+                        min="1" 
+                        style="width:45%">
+            </ng-template>  
+            <ng-template *ngIf="i== 0" let-col let-node="rowData" pTemplate="body">
+                {{node.data[col1.field]}}
+            </ng-template>
+        </p-column>
+
+
+    </p-treeTable>
+
+
+</div>

@@ -1,4 +1,13 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import {
+    Component,
+    OnInit,
+    AfterViewInit,
+    ViewEncapsulation,
+    ElementRef,
+    Renderer,
+    ViewChild
+} from '@angular/core';
+
 import {
     ProgressBarModule,
     SpinnerModule,
@@ -10,7 +19,8 @@ import {
     CheckboxModule,
     GrowlModule,
     ConfirmDialogModule,
-    ConfirmationService
+    ConfirmationService,
+    DataTable
 } from 'primeng/primeng';//PrimeNg
 
 import { InventoryService } from '../service/dataService';
@@ -19,7 +29,14 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { Skil } from '../model/Skil';
 import { validateConfig } from '@angular/router/src/config';
 import { Message } from 'primeng/components/common/api';
-//import {MessageService} from 'primeng/components/common/messageservice';
+import { element } from 'protractor';
+import { TreeviewItem, TreeviewConfig } from 'ngx-treeview';
+
+import {TreeModule,TreeNode} from 'primeng/primeng';
+
+
+//import { AfterViewInit } from '@angular/core/src/metadata/lifecycle_hooks';
+
 
 @Component({
     selector: 'app-skil',
@@ -30,37 +47,93 @@ import { Message } from 'primeng/components/common/api';
         '../../../node_modules/font-awesome/css/font-awesome.min.css',
         '../../../node_modules/primeng/resources/themes/omega/theme.css',
         '../../../node_modules/primeng/resources/primeng.min.css',
-        './skil.component.css'
+        './skil.component.css'  
     ],
     providers: [InventoryService]
 })
-export class SkilComponent implements OnInit {
+export class SkilComponent implements OnInit, AfterViewInit {
 
-    msgs: Message[] = [];
-    skils: Skil[];
-    skilsToSave: Skil[];
-    skilsToDlete: number[];
+    @ViewChild('dt') dt: ElementRef;
+    @ViewChild('someInput') someInput: ElementRef;
 
+    en: any;
     skil: Skil;
     newSkil: boolean;
     selectedSkil: Skil;
     displayDialog: boolean;
     isLoadingData: boolean;
+
+    skilsToDlete: number[];
+    msgs: Message[] = [];
+    skils: Skil[];
+    skilsToSave: Skil[];
     statuses: any[];
 
+    newSkilStatus : boolean;
+    filesTree2: TreeNode[];
+    
     constructor(private http: Http,
-        private apiService: InventoryService,
+        private rd: Renderer,
         private fb: FormBuilder,
         private spinner: SpinnerModule,
+        private apiService: InventoryService,
         private progressBar: ProgressBarModule,
-        private confirmationService: ConfirmationService
+        private confirmationService: ConfirmationService,
+
     ) {
 
-        
+
     }
-    en: any;
+
+    value = 11;
+    items: TreeviewItem[];
+    config = TreeviewConfig.create({
+        hasFilter: true,
+        hasCollapseExpand: true
+    });
+
     ngOnInit() {
 
+
+
+
+        this.filesTree2 = [
+            {
+              label: 'Folder 1',
+              collapsedIcon: 'fa-folder',
+              expandedIcon: 'fa-folder-open',
+              children: [
+                {
+                  label: 'Folder 2',
+                  collapsedIcon: 'fa-folder',
+                  expandedIcon: 'fa-folder-open',
+                  children: [
+                    {
+                      label: 'File 2',
+                      icon: 'fa-file-o'
+                    }
+                  ]
+                },
+                {
+                  label: 'Folder 2',
+                  collapsedIcon: 'fa-folder',
+                  expandedIcon: 'fa-folder-open'
+                },
+                {
+                  label: 'File 1',
+                  icon: 'fa-file-o'
+                }
+              ]
+            }
+          ];
+
+        this.items = [new TreeviewItem({
+            text: 'ABC',
+            value: 123456
+        })];
+
+
+        this.skil = new Skil();
         this.skilsToSave = [];
         this.skilsToDlete = [];
         this.statuses = [
@@ -81,21 +154,45 @@ export class SkilComponent implements OnInit {
             clear: 'Clear'
         };
         this.getAllSkilss();
-
-
-
     }
 
 
 
-   
-   
+    tableChange()
+    {
+        console.log("tableChange");
+    }
+
+    ngAfterViewInit() {
+        // let count = 0;
+        // var myInterval = setInterval(function() {
+        //     // count++;
+        //     // if(count > 100)
+        //     // {
+        //     //     clearInterval(myInterval);
+        //     // }
+        //     console.log("this.dt",this.dt);
+        //         // if(this.dt)
+        //         // {
+                    
+        //         // }
+        //     // console.log("setInterval", this.dt);
+        //     // if (this.dt){
+        //     //       clearInterval(myInterval);
+        //     //  } 
+        //   }, 50);
+        //console.log("dt....", this.someInput.nativeElement);
+
+         // this.someInput.nativeElement.value = "Anchovies! 🍕🍕";
+        // this.dt.nativeElement.style.background = "blue";
+    }
+
 
     showSuccess() {
         this.msgs = [];
-        this.msgs.push({severity:'success', summary:'נשמר בהצלחה', detail:' '});
+        this.msgs.push({ severity: 'success', summary: 'נשמר בהצלחה', detail: ' ' });
     }
-    
+
     statusChange(value, skil) {
 
         if (skil.Code > 0) {
@@ -104,6 +201,22 @@ export class SkilComponent implements OnInit {
         //  skil.Status = value;
     }
 
+    newSkilstatusChange(value ,skil) {
+        console.log(value,skil);
+
+      //  let s = new Skil();
+       // skil.Status = value;
+        // this.skil = s;
+        // if (this.skil.Status) {
+        //   //  this.skil.Status = !this.skil.Status;
+        // }
+        // else {
+        //   //  this.skil.Status = true;
+        //   skil.Status = true;
+          
+        // }
+
+    }
 
     public onStatusFilterChange(value, field, dt) {
         if (value == null) {
@@ -132,42 +245,50 @@ export class SkilComponent implements OnInit {
 
 
 
-    save() {
+    save(dt: DataTable) {
+
+        console.log("save..", dt);
         let skils = [...this.skils];
-        if (this.newSkil) {
+        // if (this.newSkil) {
 
-            var minid = 0;
+        var minid = 0;
 
-            this.skils.map(function (obj) {
-                if (obj.Code < minid) minid = obj.Code;
-            });
+        this.skils.map(function (obj) {
+            if (obj.Code < minid) minid = obj.Code;
+        });
 
-            this.skil.Code = minid >= 0 ? -1 : minid - 1;
+        this.skil.Code = minid >= 0 ? -1 : minid - 1;
 
-            skils.push(this.skil);
+        this.skil.Status = this.newSkilStatus; // TODO:
 
-            console.log(this.skil);
+        skils.push(this.skil);
 
-            this.skilsToSave.push(this.skil);
-        }
+        console.log(this.skil);
+
+        this.skilsToSave.push(this.skil);
+
+
+
+        // }
         // else
         // {
         //     skils[this.findSelectedSkilIndex()] = this.skil;
         // }
 
+        this.msgs = [{ severity: 'info', summary: this.skil.Name + ' נשמר בהצלחה ', detail: ' ' }];
 
         this.skils = skils;
-        this.skil = null;
+        this.skil = new Skil();
 
-
+        if (dt) {
+            dt.sortColumn = dt.columns.find(col => col.field.toLowerCase() === "code");
+            dt.sortField = "Code";// paginationOptions.SortColumn;
+            dt.sortOrder = 1;//(paginationOptions.SortOrder == "ASC" ? 1 : -1);
+            dt.sortSingle();
+        }
 
         this.displayDialog = false;
     }
-
-
-
-
-
 
 
     saveAll() {
@@ -175,6 +296,9 @@ export class SkilComponent implements OnInit {
         console.log('saveAll');
 
         this.apiService.saveAllSkils(this.skilsToSave, this.skilsToDlete);
+this.skilsToDlete =[];
+this.skilsToSave = [];
+
         this.showSuccess();
 
     }
@@ -204,16 +328,22 @@ export class SkilComponent implements OnInit {
                 if (skil.Code > 0) {
                     this.skilsToDlete.push(skil.Code);
                 }
-        
-                this.skil = null;
+                else
+                {
+                    this.skilsToSave = this.skilsToSave.filter(function(item) { 
+                        return item.Code !== skil.Code
+                    })
+                }
+
+                this.skil = new Skil();
                 this.displayDialog = false;
-        
+
                 this.skils = this.skils.filter((val, i) => val.Code != skil.Code);
 
-                this.msgs = [{severity:'info', summary:   skil.Name +' נמחק בהצלחה ', detail:' '}];
+                this.msgs = [{ severity: 'info', summary: skil.Name + ' נמחק בהצלחה ', detail: ' ' }];
             },
             reject: () => {
-              //  this.msgs = [{severity:'info', summary:'Rejected', detail:'You have rejected'}];
+                //  this.msgs = [{severity:'info', summary:'Rejected', detail:'You have rejected'}];
             }
         });
 
@@ -224,7 +354,7 @@ export class SkilComponent implements OnInit {
         //     return;
         // }
 
-     
+
 
     }
 
@@ -273,8 +403,8 @@ export class SkilComponent implements OnInit {
 
                 //  this.gridSkils = [...this.skils];
 
-                console.log(data);
-                console.log(this.skils);
+                //console.log(data);
+                //console.log(this.skils);
 
 
             },

@@ -9,7 +9,8 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { AppComponent } from './app.component';
 import { SkilComponent } from './skil/skil.component';
 import { YaadComponent } from './yaad/yaad.component';
-
+import { NavMenuComponent } from './navmenu/navmenu.component';
+import { TreeviewModule } from 'ngx-treeview';
 
 import {
   DataTableModule,
@@ -26,15 +27,27 @@ import {
   GrowlModule,
   ConfirmDialogModule,
   ConfirmationService,
+  InputMaskModule,
+  BlockUIModule,
+  PanelModule,
+  TreeModule,
+  TreeNode,
 
+  
 
   ProgressBarModule
 
 } from 'primeng/primeng';
 
+ 
+
+import { TestComponent } from './test/test.component';
+
 const appRoutes: Routes = [
   { path: 'skil', component: SkilComponent },
   { path: 'yaad', component: YaadComponent },
+  { path: 'test', component: TestComponent   },
+  
 
 
 ];
@@ -45,6 +58,10 @@ const appRoutes: Routes = [
     AppComponent,
     SkilComponent,
     YaadComponent,
+    NavMenuComponent,
+    TestComponent,
+  
+     
     // SkilComponent
   ],
   imports: [
@@ -52,6 +69,7 @@ const appRoutes: Routes = [
       appRoutes,
       { enableTracing: true } // <-- debugging purposes only
     ),
+    TreeviewModule.forRoot(),
 
     BrowserModule,
     FormsModule,
@@ -73,7 +91,10 @@ const appRoutes: Routes = [
     ProgressBarModule,
     GrowlModule,
     ConfirmDialogModule,
-
+    InputMaskModule,
+    BlockUIModule,
+    PanelModule,
+    TreeModule,
     BrowserAnimationsModule,
 
 
